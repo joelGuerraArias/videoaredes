@@ -82,7 +82,7 @@ def generar_titulo_con_openai(caption):
 st.title("📆 Publicador Automático de Videos")
 caption = st.text_area("✍️ Escribe el caption del video")
 usar_openai = st.checkbox("Usar OpenAI para generar título", value=True)
-video_file = st.file_uploader("🎬 Sube el video (MP4)", type=["mp4"])
+video_file = st.file_uploader("🎮 Sube el video (MP4)", type=["mp4"])
 
 if st.button("🚀 Procesar y Publicar") and video_file and caption:
     title = generar_titulo_con_openai(caption) if usar_openai else caption[:100]
@@ -95,6 +95,15 @@ if st.button("🚀 Procesar y Publicar") and video_file and caption:
         output_path = input_path.replace(".mp4", "_titled.mp4")
 
     ffmpeg_path = ffmpeg.get_ffmpeg_exe()
+
+    if not os.path.exists(ffmpeg_path):
+        st.error("❌ ffmpeg no se encuentra disponible.")
+        st.stop()
+
+    if not os.access(ffmpeg_path, os.X_OK):
+        st.error("❌ El binario de ffmpeg no tiene permisos de ejecución.")
+        st.stop()
+
     ffmpeg_cmd = [
         ffmpeg_path, "-y", "-i", input_path,
         "-vf", f"drawtext=text='{titulo_ffmpeg}':fontcolor=white:fontsize=22:x=(w-text_w)/2:y=h-(text_h*2):box=1:boxcolor=black@0.5",
@@ -108,7 +117,7 @@ if st.button("🚀 Procesar y Publicar") and video_file and caption:
         st.text(result.stderr.decode())
         st.stop()
 
-    with st.spinner("☁️ Subiendo a Cloudinary..."):
+    with st.spinner("☕️ Subiendo a Cloudinary..."):
         upload = cloudinary.uploader.upload_large(output_path, resource_type="video", folder="webhook_batch")
         video_url = upload.get("secure_url")
 
