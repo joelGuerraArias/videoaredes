@@ -113,9 +113,8 @@ if st.button("🚀 Procesar y Publicar") and video_file and caption:
 
     result = subprocess.run(ffmpeg_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if result.returncode != 0:
-        st.error("❌ Error al procesar el video")
-        st.text(result.stderr.decode())
-        st.stop()
+        st.warning("⚠️ drawtext falló, se subirá el video sin título")
+        output_path = input_path  # usar el video original sin procesar
 
     with st.spinner("☕️ Subiendo a Cloudinary..."):
         upload = cloudinary.uploader.upload_large(output_path, resource_type="video", folder="webhook_batch")
